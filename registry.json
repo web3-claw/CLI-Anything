@@ -116,7 +116,7 @@
     {
       "name": "mubu",
       "display_name": "Mubu",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Knowledge management and outlining via local Mubu desktop data",
       "requires": "Mubu desktop app",
       "homepage": "https://mubu.com",

@@ -343,7 +343,7 @@ Commands:
 ```bash
 tmpdir=$(mktemp -d)
 .venv/bin/python -m pip wheel --no-deps --wheel-dir "$tmpdir" ./agent-harness
-unzip -l "$tmpdir"/cli_anything_mubu-0.1.0-py3-none-any.whl
+unzip -l "$tmpdir"/cli_anything_mubu-0.1.1-py3-none-any.whl
 ```
 
 Latest result:

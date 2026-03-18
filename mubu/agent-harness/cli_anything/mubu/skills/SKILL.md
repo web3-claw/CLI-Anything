@@ -199,4 +199,4 @@ Use the `session` command group to inspect or update this state.
 
 ## Version
 
-0.1.0
+0.1.1

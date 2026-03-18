@@ -71,7 +71,7 @@ class AgentHarnessPackagingTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertEqual(result.stdout.strip(), "0.1.0")
+        self.assertEqual(result.stdout.strip(), "0.1.1")
 
     def test_root_setup_targets_canonical_harness_source(self):
         if STANDALONE_ROOT is None:
@@ -129,7 +129,7 @@ class AgentHarnessPackagingTests(unittest.TestCase):
             self.assertIn("MUBU_DAILY_FOLDER", content)
             self.assertNotIn("Workspace/Daily tasks", content)
             self.assertNotIn("Daily tasks resolution", content)
-            self.assertIn("## Version\n\n0.1.0", content)
+            self.assertIn("## Version\n\n0.1.1", content)
         finally:
             output_path.unlink(missing_ok=True)
 
