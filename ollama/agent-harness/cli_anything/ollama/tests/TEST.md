@@ -39,5 +39,5 @@ python -m pytest cli_anything/ollama/tests/ -v
 
 | Test Suite | Status | Notes |
 |-----------|--------|-------|
-| test_core.py | Ready | No external dependencies |
-| test_full_e2e.py | Ready | Requires `ollama serve` |
+| test_core.py | Passed | 87/87 (run 2026-03-18) |
+| test_full_e2e.py | Passed | 10 passed, 1 skipped (embed model), run 2026-03-19 with `tinyllama` |
