@@ -154,7 +154,7 @@ cp CLI-Anything/opencode-commands/*.md .opencode/commands/
 cp CLI-Anything/cli-anything-plugin/HARNESS.md .opencode/commands/
 ```
 
-> **Note:** Some OpenCode builds use `~/.config/opencode/command/` (singular) instead of `commands/`. If `commands/` does not exist, use `command/` for both global and project-level installs.
+> **Note:** Please upgrade to the latest OpenCode. Older versions use `command/` (singular) instead of `commands/`. If `commands/` does not exist, use `command/` for both global and project-level installs.
 
 > **Note:** `HARNESS.md` is the methodology spec that all commands reference. It must be in the same directory as the commands.
 
