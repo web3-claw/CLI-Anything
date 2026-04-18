@@ -258,6 +258,21 @@
       flex-shrink: 0;
     }
 
+    .nav-link-stars {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.9rem;
+      padding: 0.14rem 0.52rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-size: 0.73rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
     .theme-toggle {
       width: 42px;
       padding: 0;
@@ -1334,12 +1349,13 @@
     }
 
     .card-command-block {
-      padding: 0.9rem;
+      padding: 0.9rem 0.9rem 0.9rem 0.9rem;
       border-radius: 18px;
       border: 1px solid var(--border);
       background:
         linear-gradient(180deg, rgba(93, 168, 255, 0.07), rgba(255,255,255,0.02)),
         rgba(0,0,0,0.14);
+      position: relative;
     }
 
     .card--public .card-command-block {
@@ -1365,15 +1381,32 @@
       font-size: 0.8rem;
       color: var(--text);
       white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      line-height: 1.6;
+      overflow-wrap: break-word;
+      word-break: normal;
+      line-height: 1.45;
+      padding-top: 0.1rem;
+    }
+
+    .card-command-comment {
+      display: block;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin-bottom: 0.24rem;
+      padding-right: 5.2rem;
+    }
+
+    .card-command-line {
+      display: block;
+    }
+
+    .card-command-line + .card-command-comment {
+      margin-top: 0.42rem;
     }
 
     .card-command-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 0.7rem;
+      position: absolute;
+      top: 0.96rem;
+      right: 0.9rem;
     }
 
     .card-install-note {
@@ -1485,15 +1518,13 @@
     }
 
     .footer-copy a,
-    .footer-brand a,
-    .footer-analytics-link {
+    .footer-brand a {
       color: var(--text);
       text-decoration: none;
     }
 
     .footer-copy a:hover,
-    .footer-brand a:hover,
-    .footer-analytics-link:hover {
+    .footer-brand a:hover {
       text-decoration: underline;
     }
 
@@ -1758,12 +1789,13 @@
         </span>
       </a>
       <div class="nav-links">
-        <a class="nav-link" href="https://reeceyang.sgp1.cdn.digitaloceanspaces.com/SKILL.md" target="_blank">
+        <a class="nav-link" href="https://github.com/HKUDS/CLI-Anything/blob/main/skills/cli-hub-meta-skill/SKILL.md" target="_blank">
           SKILL.md
         </a>
         <a class="nav-link" href="https://github.com/HKUDS/CLI-Anything" target="_blank">
           <svg viewBox="0 0 98 96" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6C29.304 70.25 17.9 66.013 17.9 47.02c0-5.52 1.94-10.046 5.127-13.58-.486-1.302-2.264-6.437.486-13.34 0 0 4.206-1.302 13.59 5.216 3.963-1.14 8.17-1.628 12.34-1.628 4.17 0 8.376.568 12.34 1.628 9.384-6.518 13.59-5.216 13.59-5.216 2.75 6.903.972 12.038.486 13.34 3.268 3.534 5.127 8.06 5.127 13.58 0 19.074-11.485 23.15-22.328 24.29 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/></svg>
           GitHub
+          <span class="nav-link-stars" data-github-stars aria-label="GitHub star count">--</span>
         </a>
         <a class="nav-link" href="https://github.com/HKUDS/CLI-Anything/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a>
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -1779,7 +1811,7 @@
         <h1><em>CLI</em> tools for <span>software, APIs, and autonomous agents.</span></h1>
         <p class="hero-lead"><strong>Any software. Any codebase. Any Web API.</strong> Install an orchestration hub that can discover, explain, install, update, and remove CLIs across first-party harnesses and public ecosystems.</p>
         <div class="hero-actions">
-          <a class="btn-primary" href="https://reeceyang.sgp1.cdn.digitaloceanspaces.com/SKILL.md" target="_blank">Get Agent SKILL</a>
+          <a class="btn-primary" href="https://github.com/HKUDS/CLI-Anything/blob/main/skills/cli-hub-meta-skill/SKILL.md" target="_blank">Get Agent SKILL</a>
           <a class="btn-secondary" href="https://github.com/HKUDS/CLI-Anything" target="_blank">
             <svg viewBox="0 0 98 96" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6C29.304 70.25 17.9 66.013 17.9 47.02c0-5.52 1.94-10.046 5.127-13.58-.486-1.302-2.264-6.437.486-13.34 0 0 4.206-1.302 13.59 5.216 3.963-1.14 8.17-1.628 12.34-1.628 4.17 0 8.376.568 12.34 1.628 9.384-6.518 13.59-5.216 13.59-5.216 2.75 6.903.972 12.038.486 13.34 3.268 3.534 5.127 8.06 5.127 13.58 0 19.074-11.485 23.15-22.328 24.29 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/></svg>
             Star on GitHub
@@ -1810,6 +1842,11 @@
         <section class="rail-panel">
           <h3>Empower your agent</h3>
           <p>Install the meta-skill once, then let the agent choose the right CLI from the registry.</p>
+          <div class="install-row">
+            <span class="chip-label">npx skills</span>
+            <code>npx skills add HKUDS/CLI-Anything --skill cli-hub-meta-skill -g -y</code>
+            <button class="copy-btn" onclick="copyCmd(this, 'npx skills add HKUDS/CLI-Anything --skill cli-hub-meta-skill -g -y')">Copy</button>
+          </div>
           <div class="install-row">
             <span class="chip-label">OpenClaw</span>
             <code>openclaw skills install cli-anything-hub</code>
@@ -1948,13 +1985,17 @@
                     <span class="control-kicker">Sort mode</span>
                   </div>
                   <button class="sort-trigger" id="sort-trigger-public" type="button" aria-haspopup="listbox" aria-expanded="false">
-                    <span class="sort-current" id="sort-current-public">Name</span>
+                    <span class="sort-current" id="sort-current-public">Last updated</span>
                     <span class="sort-chevron">
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </span>
                   </button>
                   <div class="sort-menu" id="sort-menu-public" role="listbox" hidden>
-                    <button class="sort-option" type="button" data-deck="public" data-value="name" role="option" aria-selected="true">
+                    <button class="sort-option" type="button" data-deck="public" data-value="updated" role="option" aria-selected="true">
+                      <span><strong>Last updated</strong><span>Put the freshest public CLIs first.</span></span>
+                      <span class="sort-option-mark">✓</span>
+                    </button>
+                    <button class="sort-option" type="button" data-deck="public" data-value="name" role="option" aria-selected="false">
                       <span><strong>Name</strong><span>Alphabetical list for known public tools.</span></span>
                       <span class="sort-option-mark">✓</span>
                     </button>
@@ -1992,7 +2033,7 @@
       </div>
       <div class="footer-stats">
         <div class="footer-label">Traffic Snapshot</div>
-        <a class="footer-analytics-link" href="https://cloud.umami.is/share/mnilRgKH0oo7SJTs" target="_blank">
+        <div class="footer-analytics-link" aria-label="Traffic snapshot">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           <span class="stat-dot dot-total"></span>
           <span id="stat-total">&mdash;</span> visits
@@ -2002,7 +2043,7 @@
           <span class="analytics-sep">&middot;</span>
           <span class="stat-dot dot-agent"></span>
           <span id="stat-agent">&mdash;</span> AI agent
-        </a>
+        </div>
       </div>
     </footer>
   </div>
@@ -2034,6 +2075,8 @@
     });
 
     const REPO = 'https://github.com/HKUDS/CLI-Anything';
+    const GITHUB_REPO_API = 'https://api.github.com/repos/HKUDS/CLI-Anything';
+    const REPO_SKILLS_SOURCE = 'HKUDS/CLI-Anything';
     const REGISTRY_URLS = [
       '../../registry.json',
       'https://raw.githubusercontent.com/HKUDS/CLI-Anything/main/registry.json'
@@ -2059,7 +2102,7 @@
 
     const deckState = {
       harness: { filter: 'all', sort: 'updated', query: '' },
-      public: { filter: 'all', sort: 'name', query: '' },
+      public: { filter: 'all', sort: 'updated', query: '' },
     };
 
     async function fetchJson(urls) {
@@ -2072,6 +2115,34 @@
         }
       }
       return null;
+    }
+
+    function formatCompactCount(value) {
+      return new Intl.NumberFormat('en', {
+        notation: 'compact',
+        maximumFractionDigits: value >= 10000 ? 0 : 1,
+      }).format(value);
+    }
+
+    async function loadGitHubStars() {
+      try {
+        const resp = await fetch(GITHUB_REPO_API, {
+          headers: { Accept: 'application/vnd.github+json' }
+        });
+        if (!resp.ok) return;
+
+        const repo = await resp.json();
+        const stars = repo.stargazers_count;
+        if (typeof stars !== 'number') return;
+
+        document.querySelectorAll('[data-github-stars]').forEach((el) => {
+          el.textContent = formatCompactCount(stars);
+          el.setAttribute('aria-label', stars.toLocaleString('en-US') + ' GitHub stars');
+          el.title = stars.toLocaleString('en-US') + ' GitHub stars';
+        });
+      } catch (_) {
+        // Keep fallback placeholder when GitHub API is unavailable.
+      }
     }
 
     async function loadRegistries() {
@@ -2089,6 +2160,7 @@
 
         if (publicData && publicData.clis) {
           publicClis = publicData.clis;
+          if (dates) publicClis.forEach((c) => { c.last_modified = dates[c.name]; });
         }
 
         const totalClis = harnessClis.length + publicClis.length;
@@ -2287,6 +2359,45 @@
       grid.innerHTML = (deck === 'harness' ? filtered.map(renderHarnessCard) : filtered.map(renderPublicCard)).join('');
     }
 
+    function repoSkillId(skillPath) {
+      if (!skillPath || skillPath.startsWith('http')) return '';
+      const match = skillPath.match(/^skills\/([^/]+)\/SKILL\.md$/);
+      return match ? match[1] : '';
+    }
+
+    function normalizeNpxSkillsCmd(cmd) {
+      if (!cmd) return '';
+      const trimmed = cmd.trim();
+      if (!trimmed.startsWith('npx skills add ')) return '';
+      return trimmed
+        .replace(/\s+-g\b/g, '')
+        .replace(/\s+-y\b/g, '')
+        .trim() + ' -g -y';
+    }
+
+    function harnessSkillCmd(c) {
+      const skillId = repoSkillId(c.skill_md);
+      return skillId ? 'npx skills add ' + REPO_SKILLS_SOURCE + ' --skill ' + skillId + ' -g -y' : '';
+    }
+
+    function publicSkillCmd(c) {
+      return normalizeNpxSkillsCmd(c.skill_md);
+    }
+
+    function renderCommandStack(steps, sourceLabel) {
+      const display = steps.map((step) =>
+        '<span class="card-command-comment"># ' + esc(step.label.toLowerCase()) + '</span><span class="card-command-line">' + esc(step.cmd) + '</span>'
+      ).join('');
+      const copyText = steps.map((step) =>
+        '# ' + step.label.toLowerCase() + '\n' + step.cmd
+      ).join('\n');
+      return '<div class="card-command-block">' +
+        '<div class="card-command-label"><span>Install Commands</span><span>' + esc(sourceLabel) + '</span></div>' +
+        '<div class="card-command">' + display + '</div>' +
+        '<div class="card-command-actions"><button class="card-copy-btn" onclick=\'copyCmd(this, ' + JSON.stringify(copyText) + ')'>Copy</button></div>' +
+      '</div>';
+    }
+
     function renderHarnessCard(c) {
       const requiresHtml = c.requires
         ? '<div class="card-requires"><strong>Requires</strong> ' + esc(c.requires) + '</div>'
@@ -2310,6 +2421,12 @@
         : '';
       const dateHtml = c.last_modified ? '<div class="card-date">Updated ' + esc(c.last_modified) + '</div>' : '';
       const linksHtml = sourceLink + (skillLink ? skillLink : '');
+      const installSteps = [
+        { label: 'step 1 · install cli', cmd: 'cli-hub install ' + c.name, badge: 'CLI-Hub' }
+      ];
+      const skillCmd = harnessSkillCmd(c);
+      if (skillCmd) installSteps.push({ label: 'step 2 · install skill', cmd: skillCmd, badge: 'npx skills' });
+      const installBlock = renderCommandStack(installSteps, 'CLI-Hub');
 
       return `
         <article class="card card--harness">
@@ -2326,16 +2443,7 @@
             ${dateHtml}
             ${requiresHtml}
           </div>
-          <div class="card-command-block">
-            <div class="card-command-label">
-              <span>Install via CLI-Hub</span>
-              <span>PyPI</span>
-            </div>
-            <div class="card-command">pip install cli-anything-hub\ncli-hub install ${esc(c.name)}</div>
-            <div class="card-command-actions">
-              <button class="card-copy-btn" onclick="copyCmd(this, 'pip install cli-anything-hub && cli-hub install ${esc(c.name)}')">Copy</button>
-            </div>
-          </div>
+          ${installBlock}
           <div class="card-footer">
             <div class="card-links">${linksHtml}</div>
             ${contributorHtml}
@@ -2356,6 +2464,7 @@
 
     function renderPublicCard(c) {
       const isBundled = (c.install_strategy || c.package_manager) === 'bundled';
+      const dateHtml = c.last_modified ? '<div class="card-date">Updated ' + esc(c.last_modified) + '</div>' : '';
       const requiresHtml = c.requires
         ? '<div class="card-requires"><strong>Requires</strong> ' + esc(c.requires) + '</div>'
         : '';
@@ -2374,13 +2483,14 @@
         ? '<div class="card-npx">Direct command: <code>' + esc(directCmd) + '</code></div>'
         : '';
       const installNotesHtml = c.install_notes ? '<div class="card-npx">' + esc(c.install_notes) + '</div>' : '';
+      const installSteps = isBundled
+        ? []
+        : [{ label: 'step 1 · install cli', cmd: 'cli-hub install ' + c.name, badge: 'CLI-Hub' }];
+      const skillCmd = publicSkillCmd(c);
+      if (skillCmd) installSteps.push({ label: 'step 2 · install skill', cmd: skillCmd, badge: 'npx skills' });
       const installBlock = isBundled
         ? '<div class="card-install-note">Bundled with the upstream application. Install or update the parent app and enable its CLI integration.</div>'
-        : '<div class="card-command-block">' +
-            '<div class="card-command-label"><span>Install via CLI-Hub</span><span>Source aware</span></div>' +
-            '<div class="card-command">pip install cli-anything-hub\ncli-hub install ' + esc(c.name) + '</div>' +
-            '<div class="card-command-actions"><button class="card-copy-btn" onclick="copyCmd(this, \'pip install cli-anything-hub && cli-hub install ' + esc(c.name) + '\')">Copy</button></div>' +
-          '</div>';
+        : renderCommandStack(installSteps, 'Source aware');
 
       return `
         <article class="card card--public">
@@ -2394,6 +2504,7 @@
           <div class="card-title">${titleHtml}</div>
           <div class="card-desc">${esc(c.description)}</div>
           <div class="card-submeta">
+            ${dateHtml}
             ${requiresHtml}
             ${directCmdHtml}
             ${installNotesHtml}
@@ -2511,48 +2622,47 @@
 
       const UMAMI_API = 'https://api.umami.is/v1';
       const UMAMI_KEY = 'api_idAebMhzn6z0hsUQT7BSxRuCK2GUZvRY';
-      const WEBSITE_IDS = [
-        '07082d05-efd3-4f85-a7a1-b426b0e8bfaa',
-        'a076c661-bed1-405c-a522-813794e688b4',
-      ];
+      const HKUDS_WEBSITE_ID = '07082d05-efd3-4f85-a7a1-b426b0e8bfaa';
+      const CC_WEBSITE_ID = 'a076c661-bed1-405c-a522-813794e688b4';
       const headers = { Accept: 'application/json', 'x-umami-api-key': UMAMI_KEY };
 
       async function loadVisitorStats() {
         try {
           const now = Date.now();
-          let totalVisits = 0;
-          let humanCount = 0;
-          const fetches = WEBSITE_IDS.flatMap((id) => [
-            fetch(UMAMI_API + '/websites/' + id + '/stats?startAt=0&endAt=' + now, { headers }),
-            fetch(UMAMI_API + '/websites/' + id + '/events/series?startAt=0&endAt=' + now + '&unit=year&timezone=UTC', { headers })
+          let hkudsHumanVisits = 0;
+          let ccHumanVisits = 0;
+          let ccAgentVisits = 0;
+          const [hkudsStatsResp, ccEventsResp] = await Promise.all([
+            fetch(UMAMI_API + '/websites/' + HKUDS_WEBSITE_ID + '/stats?startAt=0&endAt=' + now, { headers }),
+            fetch(UMAMI_API + '/websites/' + CC_WEBSITE_ID + '/events/series?startAt=0&endAt=' + now + '&unit=year&timezone=UTC', { headers })
           ]);
-          const [statsResp1, eventsResp1, statsResp2, eventsResp2] = await Promise.all(fetches);
 
-          for (const resp of [statsResp1, statsResp2]) {
-            if (resp.ok) {
-              const stats = await resp.json();
-              totalVisits += stats.visits ?? 0;
-            }
+          if (hkudsStatsResp.ok) {
+            const stats = await hkudsStatsResp.json();
+            hkudsHumanVisits = stats.visits ?? 0;
           }
 
-          for (const resp of [eventsResp1, eventsResp2]) {
-            if (resp.ok) {
-              const events = await resp.json();
-              events.forEach((e) => {
-                if (e.x === 'visit-human') humanCount += e.y || 0;
-              });
-            }
+          if (ccEventsResp.ok) {
+            const events = await ccEventsResp.json();
+            events.forEach((e) => {
+              if (e.x === 'visit-human') ccHumanVisits += e.y || 0;
+              if (e.x === 'visit-agent') ccAgentVisits += e.y || 0;
+            });
           }
+
+          const humanCount = hkudsHumanVisits + ccHumanVisits;
+          const totalVisits = humanCount + ccAgentVisits;
 
           document.getElementById('stat-total').textContent = totalVisits.toLocaleString();
           document.getElementById('stat-human').textContent = humanCount.toLocaleString();
-          document.getElementById('stat-agent').textContent = Math.max(0, totalVisits - humanCount).toLocaleString();
+          document.getElementById('stat-agent').textContent = ccAgentVisits.toLocaleString();
         } catch (_) {
           // Leave fallback dashes.
         }
       }
 
       loadVisitorStats();
+      loadGitHubStars();
     })();
   </script>
 </body>

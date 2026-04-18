@@ -52,6 +52,9 @@
 !/openclaw-skill/
 !/cli-hub-meta-skill/
 !/cli-hub/
+!/cli-hub-matrix/
+!/skills/
+!/skills/**
 
 # Ignore cli-hub-skill (auto-generated, not tracked)
 /cli-hub-skill/
@@ -255,6 +258,7 @@ assets/gen_typing_gif.py
 # Step 10: Allow CLI Hub registry and frontend
 !/registry.json
 !/public_registry.json
+!/matrix_registry.json
 !/docs/
 /docs/*
 !/docs/hub/

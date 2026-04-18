@@ -40,7 +40,7 @@ SAMPLE_REGISTRY = {
             "homepage": "https://gimp.org",
             "install_cmd": "pip install git+https://github.com/HKUDS/CLI-Anything.git#subdirectory=gimp/agent-harness",
             "entry_point": "cli-anything-gimp",
-            "skill_md": None,
+            "skill_md": "skills/cli-anything-gimp/SKILL.md",
             "category": "image",
             "contributor": "test-user",
             "contributor_url": "https://github.com/test-user",
@@ -151,7 +151,6 @@ class TestRegistry:
     def test_list_categories(self, mock_fetch):
         cats = list_categories()
         assert cats == ["3d", "audio", "image"]
-
 
 # ─── Installer tests ──────────────────────────────────────────────────
 
@@ -485,7 +484,6 @@ class TestScriptStrategy:
             assert data["jimeng"]["strategy"] == "command"
             assert data["jimeng"]["package_manager"] == "script"
 
-
 # ─── Analytics tests ──────────────────────────────────────────────────
 
 
@@ -686,6 +684,7 @@ class TestCLI:
         result = self.runner.invoke(main, ["info", "gimp"])
         assert "GIMP" in result.output
         assert "image" in result.output
+        assert "Install: cli-hub install gimp" in result.output
         assert result.exit_code == 0
 
     @patch("cli_hub.cli.track_first_run")

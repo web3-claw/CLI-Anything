@@ -237,7 +237,12 @@ def extract_cli_metadata(harness_path: str) -> SkillMetadata:
     command_groups = extract_commands_from_cli(cli_file) if cli_file.exists() else []
     examples = generate_examples(software_name, command_groups)
     skill_name = f"cli-anything-{software_name}"
-    skill_description = f"Command-line interface for {_format_display_name(software_name)} - {skill_intro[:100]}..."
+    if skill_intro:
+        intro_snippet = skill_intro[:100]
+        suffix = "..." if len(skill_intro) > 100 else ""
+        skill_description = f"Command-line interface for {_format_display_name(software_name)} - {intro_snippet}{suffix}"
+    else:
+        skill_description = f"Command-line interface for {_format_display_name(software_name)}"
 
     return SkillMetadata(
         skill_name=skill_name,
@@ -399,12 +404,18 @@ def generate_skill_md(metadata: SkillMetadata, template_path: Optional[str] = No
 def generate_skill_file(harness_path: str, output_path: Optional[str] = None, template_path: Optional[str] = None) -> str:
     metadata = extract_cli_metadata(harness_path)
     content = generate_skill_md(metadata, template_path)
+    harness_root = Path(harness_path)
+    skill_id = f"cli-anything-{harness_root.parent.name.replace('_', '-')}"
     if output_path is None:
-        output = Path(harness_path) / "cli_anything" / metadata.software_name / "skills" / "SKILL.md"
+        output = harness_root.parent.parent / "skills" / skill_id / "SKILL.md"
     else:
         output = Path(output_path)
+    mirror = harness_root / "cli_anything" / metadata.software_name / "skills" / "SKILL.md"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(content, encoding="utf-8")
+    if mirror != output:
+        mirror.parent.mkdir(parents=True, exist_ok=True)
+        mirror.write_text(content, encoding="utf-8")
     return str(output)
 
 
