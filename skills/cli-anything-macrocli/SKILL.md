@@ -2,16 +2,16 @@
 name: "cli-anything-macrocli"
 description: >
   Use when the agent wants to define, list, inspect, or execute GUI macros
-  via the MacroCLI System CLI. Macros are parameterized, CLI-callable
+  via the MacroCLI CLI. Macros are parameterized, CLI-callable
   workflows — the agent invokes `macro run <name>` and the system handles
   backend routing (plugin, file transform, accessibility, compiled GUI replay).
 ---
 
-# MacroCLI System CLI
+# MacroCLI CLI
 
 ## What It Is
 
-The MacroCLI System converts valuable GUI workflows into parameterized,
+The MacroCLI converts valuable GUI workflows into parameterized,
 CLI-callable macros. Agents **never touch the GUI directly** — they call macros
 through this stable CLI, and the runtime routes execution to the best available
 backend (native plugin/API, file transformation, semantic UI control, or
@@ -20,7 +20,7 @@ precompiled GUI macro replay).
 ## Installation
 
 ```bash
-cd macrocli-skill/agent-harness
+cd macrocli/agent-harness
 pip install -e .
 ```
 
