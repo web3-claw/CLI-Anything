@@ -2908,15 +2908,29 @@
       });
 
       // ── Live analytics via Cloudflare Worker proxy ──
-      // PostHog key lives as a Worker secret (repo:
-      // ~/clianything-analytics-worker). Runtime PostHog counts are queried
-      // every refresh and added to the fixed pre-migration Umami baseline.
+      // Runtime stats are fetched once per page load. The Worker combines
+      // Cloudflare HTTP totals with tracked agent events and derives human
+      // website visits as total HTTP requests minus visit-agent events.
       const ANALYTICS_PROXY_URL = 'https://analytics.clianything.cc/';
-      const LIVE_STATS_REFRESH_MS = 60_000;
       const ZERO_STATS = {
         human: 0, agent: 0,
         cli_hub_human: 0, cli_hub_agent: 0,
       };
+
+      function normalizeStats(stats) {
+        const out = {};
+        for (const key of Object.keys(ZERO_STATS)) {
+          out[key] = Number(stats && stats[key]) || 0;
+        }
+        return out;
+      }
+
+      async function fetchWorkerStats() {
+        const response = await fetch(ANALYTICS_PROXY_URL + 'stats');
+        if (!response.ok) throw new Error('analytics stats http ' + response.status);
+        const data = await response.json();
+        return normalizeStats(data.stats || data);
+      }
 
       async function fetchPosthogTotals() {
         const hogql = (
@@ -2943,6 +2957,15 @@
         };
       }
 
+      async function fetchVisitorStats() {
+        try {
+          return await fetchWorkerStats();
+        } catch {
+          const posthog = await fetchPosthogTotals();
+          return sumStats(UMAMI_BASELINE_STATS, posthog);
+        }
+      }
+
       function sumStats(a, b) {
         const out = {};
         for (const key of Object.keys(ZERO_STATS)) out[key] = (a[key] || 0) + (b[key] || 0);
@@ -2964,16 +2987,14 @@
       }
 
       async function refreshVisitorStats() {
-        const posthog = await fetchPosthogTotals();
-        const merged = sumStats(UMAMI_BASELINE_STATS, posthog);
-        if (!hasAnyStats(merged)) return false;
-        applyVisitorStats(withDerivedTotals(merged));
+        const stats = await fetchVisitorStats();
+        if (!hasAnyStats(stats)) return false;
+        applyVisitorStats(withDerivedTotals(stats));
         return true;
       }
 
       async function loadVisitorStats() {
         await refreshVisitorStats().catch(() => false);
-        setInterval(() => { refreshVisitorStats().catch(() => false); }, LIVE_STATS_REFRESH_MS);
       }
 
       loadVisitorStats();
