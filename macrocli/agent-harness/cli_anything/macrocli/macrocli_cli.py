@@ -440,10 +440,10 @@ def macro_define(name, output):
               help="After recording, interactively choose which typed values "
                    "become CLI parameters.")
 @click.option("--auto-parameterize", "do_auto_param", is_flag=True,
-              help="After recording, use Gemini to automatically suggest "
-                   "parameter names (requires --api-key or GEMINI_API_KEY).")
-@click.option("--api-key", default=None, envvar="GEMINI_API_KEY",
-              help="Gemini API key for --auto-parameterize.")
+              help="After recording, use an LLM to automatically suggest "
+                   "parameter names (requires --api-key or MACROCLI_API_KEY).")
+@click.option("--api-key", default=None, envvar="MACROCLI_API_KEY",
+              help="API key for --auto-parameterize.")
 @handle_error
 def macro_record(name, output_dir, timeout, do_agent_review,
                  do_parameterize, do_auto_param, api_key):
@@ -509,14 +509,14 @@ def macro_record(name, output_dir, timeout, do_agent_review,
     if do_auto_param and type_steps:
         try:
             from cli_anything.macrocli.core.parameterize import (
-                gemini_suggest_parameters,
+                llm_suggest_parameters,
                 interactive_parameterize,
             )
             if not _json_output:
-                click.echo(f"\nAsking Gemini to suggest parameters...")
-            suggestions = gemini_suggest_parameters(type_steps, api_key=api_key)
+                click.echo(f"\nAsking LLM to suggest parameters...")
+            suggestions = llm_suggest_parameters(type_steps, api_key=api_key)
             if suggestions and not _json_output:
-                click.echo("  Gemini suggestions:")
+                click.echo("  LLM suggestions:")
                 for idx, pname in suggestions.items():
                     step = recorder._steps[idx]
                     click.echo(f"    step {idx+1} {step.text!r} → ${{{pname}}}")
@@ -527,9 +527,9 @@ def macro_record(name, output_dir, timeout, do_agent_review,
                 final = {**suggestions, **confirmed}
                 parameters = recorder.apply_parameterization(final)
             elif not suggestions and not _json_output:
-                click.echo("  Gemini found no values to parameterize.")
+                click.echo("  LLM found no values to parameterize.")
         except Exception as e:
-            click.echo(f"  Warning: Gemini parameterization failed: {e}", err=True)
+            click.echo(f"  Warning: LLM parameterization failed: {e}", err=True)
             do_parameterize = True
 
     if do_parameterize and type_steps:
@@ -568,7 +568,7 @@ def macro_record(name, output_dir, timeout, do_agent_review,
     else:
         click.echo(f"✓ Saved {len(recorder._steps)} steps to: {pkg_dir}/")
         if agent_count:
-            click.echo(f"  Agent steps: {agent_count} (will use Gemini at runtime)")
+            click.echo(f"  Agent steps: {agent_count} (will use vision model at runtime)")
         if parameters:
             click.echo(f"  Parameters: {', '.join(parameters.keys())}")
         click.echo(
@@ -593,8 +593,8 @@ def macro_record(name, output_dir, timeout, do_agent_review,
       # Record + interactively parameterize typed values
       macro record my_export --parameterize
 
-      # Record + auto-parameterize with Gemini
-      macro record my_export --auto-parameterize --api-key $GEMINI_API_KEY
+      # Record + auto-parameterize with LLM
+      macro record my_export --auto-parameterize --api-key $MACROCLI_API_KEY
 
     Requires: pip install mss Pillow pynput
     """
@@ -634,17 +634,17 @@ def macro_record(name, output_dir, timeout, do_agent_review,
     if do_auto_param and type_steps:
         try:
             from cli_anything.macrocli.core.parameterize import (
-                gemini_suggest_parameters,
+                llm_suggest_parameters,
                 interactive_parameterize,
             )
             if not _json_output:
-                click.echo(f"\nAsking Gemini to suggest parameters for "
+                click.echo(f"\nAsking LLM to suggest parameters for "
                            f"{len(type_steps)} type_text step(s)...")
-            suggestions = gemini_suggest_parameters(
+            suggestions = llm_suggest_parameters(
                 type_steps, api_key=api_key
             )
             if suggestions and not _json_output:
-                click.echo("  Gemini suggestions:")
+                click.echo("  LLM suggestions:")
                 for idx, pname in suggestions.items():
                     step = recorder._steps[idx]
                     click.echo(f"    step {idx+1} {step.text!r} → ${{{pname}}}")
@@ -654,15 +654,15 @@ def macro_record(name, output_dir, timeout, do_agent_review,
                     [(i, s) for i, s in type_steps if i in suggestions],
                     existing_params=set(),
                 )
-                # For steps Gemini suggested but user skipped, remove them
+                # For steps LLM suggested but user skipped, remove them
                 final = {i: n for i, n in suggestions.items() if i in confirmed}
                 # For steps user renamed, use their name
                 final.update(confirmed)
                 parameters = recorder.apply_parameterization(final)
             elif not suggestions and not _json_output:
-                click.echo("  Gemini found no values to parameterize.")
+                click.echo("  LLM found no values to parameterize.")
         except Exception as e:
-            click.echo(f"  Warning: Gemini parameterization failed: {e}", err=True)
+            click.echo(f"  Warning: LLM parameterization failed: {e}", err=True)
             click.echo("  Falling back to interactive mode...")
             do_parameterize = True
 
@@ -709,9 +709,9 @@ def macro_record(name, output_dir, timeout, do_agent_review,
 @macro.command("parameterize")
 @click.argument("yaml_file")
 @click.option("--auto", "do_auto", is_flag=True,
-              help="Use Gemini to suggest parameter names automatically.")
-@click.option("--api-key", default=None, envvar="GEMINI_API_KEY",
-              help="Gemini API key for --auto.")
+              help="Use an LLM to suggest parameter names automatically.")
+@click.option("--api-key", default=None, envvar="MACROCLI_API_KEY",
+              help="API key for --auto.")
 @handle_error
 def macro_parameterize(yaml_file, do_auto, api_key):
     """Interactively parameterize typed values in an existing macro YAML.
@@ -723,11 +723,11 @@ def macro_parameterize(yaml_file, do_auto, api_key):
     \b
     Examples:
       macro parameterize /tmp/recording/my_export.yaml
-      macro parameterize my_export.yaml --auto --api-key $GEMINI_API_KEY
+      macro parameterize my_export.yaml --auto --api-key $MACROCLI_API_KEY
     """
     from cli_anything.macrocli.core.parameterize import (
         parameterize_yaml_file,
-        gemini_suggest_parameters,
+        llm_suggest_parameters,
         interactive_parameterize,
         _YamlTypeStep,
     )
@@ -740,7 +740,7 @@ def macro_parameterize(yaml_file, do_auto, api_key):
         return
 
     if do_auto:
-        # Load the file, extract type_text steps, ask Gemini, then apply
+        # Load the file, extract type_text steps, ask LLM, then apply
         import yaml as _yaml
         with open(p, encoding="utf-8") as f:
             macro_dict = _yaml.safe_load(f)
@@ -759,11 +759,11 @@ def macro_parameterize(yaml_file, do_auto, api_key):
         wrapped = [(i, _YamlTypeStep(i, s)) for i, s in type_steps_raw]
 
         try:
-            click.echo(f"Asking Gemini to suggest parameters for "
+            click.echo(f"Asking LLM to suggest parameters for "
                        f"{len(wrapped)} type_text step(s)...")
-            suggestions = gemini_suggest_parameters(wrapped, api_key=api_key)
+            suggestions = llm_suggest_parameters(wrapped, api_key=api_key)
         except Exception as e:
-            click.echo(f"Gemini failed: {e}\nFalling back to interactive.", err=True)
+            click.echo(f"LLM failed: {e}\nFalling back to interactive.", err=True)
             suggestions = {}
             do_auto = False
 
@@ -774,7 +774,7 @@ def macro_parameterize(yaml_file, do_auto, api_key):
                 click.echo(f"    step {idx+1} {w.text!r} → ${{{pname}}}")
             click.echo()
 
-        # Let user confirm (pre-fill Gemini suggestions as defaults)
+        # Let user confirm (pre-fill LLM suggestions as defaults)
         existing = set((macro_dict.get("parameters") or {}).keys())
         confirmed = interactive_parameterize(
             [(i, w) for i, w in wrapped if i in suggestions],
@@ -831,35 +831,35 @@ def macro_parameterize(yaml_file, do_auto, api_key):
               help="'current' to take a screenshot now, or path to an image file.")
 @click.option("--output", "-o", default=None,
               help="Output YAML file path (default: <name>.yaml).")
-@click.option("--api-key", default=None, envvar="GEMINI_API_KEY",
-              help="Gemini API key (or set GEMINI_API_KEY env var).")
-@click.option("--model", default="gemini-1.5-flash",
-              help="Gemini model name.")
+@click.option("--api-key", default=None, envvar="MACROCLI_API_KEY",
+              help="API key (or set MACROCLI_API_KEY env var).")
+@click.option("--model", default=None,
+              help="Model name (or set MACROCLI_MODEL env var).")
 @handle_error
 def macro_assist(name, goal, screenshot, output, api_key, model):
-    """Generate a macro YAML from a screenshot using Gemini Vision (optional).
+    """Generate a macro YAML from a screenshot using a vision model (optional).
 
     \b
-    Takes a screenshot, sends it to Gemini with your goal, and generates
-    a macro YAML. Steps that require visual templates will include
+    Takes a screenshot, sends it to the configured model with your goal, and
+    generates a macro YAML. Steps that require visual templates will include
     instructions for which template images to capture.
 
-    Requires: pip install google-generativeai mss Pillow
+    Requires: pip install openai mss Pillow
 
     \b
     Example:
       macro assist export_png \\
           --goal "Export the current diagram as PNG to /tmp/out.png" \\
-          --api-key $GEMINI_API_KEY
+          --api-key $MACROCLI_API_KEY
     """
     try:
-        from cli_anything.macrocli.core.gemini_assist import generate_macro
+        from cli_anything.macrocli.core.llm_assist import generate_macro
     except ImportError as e:
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)
 
     if not _json_output:
-        click.echo(f"Sending screenshot to Gemini ({model})...")
+        click.echo(f"Sending screenshot to model ({model or os.environ.get('MACROCLI_MODEL', 'unset')})...")
 
     result = generate_macro(
         goal=goal,

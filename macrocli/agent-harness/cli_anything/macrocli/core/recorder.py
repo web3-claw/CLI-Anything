@@ -636,7 +636,7 @@ class MacroRecorder:
         print("─" * 60)
         print("  Step Review — mark steps as 'fixed' or 'agent'")
         print("  Enter = fixed (fast, deterministic)")
-        print("  a     = agent step (Gemini decides at runtime)")
+        print("  a     = agent step (vision model decides at runtime)")
         print("─" * 60)
 
         for i, step in enumerate(self._steps):

@@ -226,6 +226,11 @@
 !/lldb/agent-harness/
 !/macrocli/agent-harness/
 
+# Exclude non-gedit demo macros from macrocli (local only)
+/macrocli/agent-harness/cli_anything/macrocli/macro_definitions/demo/flameshot*
+/macrocli/agent-harness/cli_anything/macrocli/macro_definitions/demo/kolourpaint*
+/macrocli/agent-harness/cli_anything/macrocli/macro_definitions/demo/snapshots/
+
 # Step 7: Ignore build artifacts within allowed dirs
 **/__pycache__/
 **/*.egg-info/

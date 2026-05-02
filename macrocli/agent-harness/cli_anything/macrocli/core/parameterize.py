@@ -1,4 +1,4 @@
-"""Parameterization helpers — interactive and Gemini-assisted.
+"""Parameterization helpers — interactive and LLM-assisted.
 
 Interactive flow (no external deps):
     assignments = interactive_parameterize(type_steps)
@@ -8,8 +8,8 @@ Interactive flow (no external deps):
 Post-hoc flow on an existing YAML file:
     parameterize_yaml_file(yaml_path)   # modifies in-place
 
-Gemini-assisted flow (optional, requires google-generativeai):
-    assignments = gemini_suggest_parameters(type_steps, api_key=...)
+LLM-assisted flow (optional, requires openai):
+    assignments = llm_suggest_parameters(type_steps, api_key=...)
     # returns same shape as interactive_parameterize, can be passed directly
 """
 
@@ -202,20 +202,23 @@ def parameterize_yaml_file(yaml_path: str) -> bool:
     return True
 
 
-# ── Gemini-assisted parameterization ─────────────────────────────────────────
+# ── LLM-assisted parameterization ─────────────────────────────────────────
 
-def gemini_suggest_parameters(
+def llm_suggest_parameters(
     type_steps: list[tuple[int, object]],
     api_key: Optional[str] = None,
-    model: str = "gemini-1.5-flash",
+    model: Optional[str] = None,
+    base_url: Optional[str] = None,
 ) -> dict[int, str]:
-    """Use Gemini to suggest which type_text steps should be parameterized
+    """Use a vision model to suggest which type_text steps should be parameterized
     and what to name the parameters.
 
     Args:
         type_steps: Same format as interactive_parameterize input.
-        api_key: Gemini API key. Falls back to GEMINI_API_KEY env var.
-        model: Gemini model name.
+        api_key: API key. Falls back to MACROCLI_API_KEY env var.
+        model: Model name. Falls back to MACROCLI_MODEL env var.
+        base_url: Base URL for non-OpenAI providers. Falls back to
+                  MACROCLI_BASE_URL env var.
 
     Returns:
         {list_index: suggested_param_name} — same shape as interactive output.
@@ -226,21 +229,30 @@ def gemini_suggest_parameters(
     import os
 
     try:
-        import google.generativeai as genai
+        from openai import OpenAI
     except ImportError:
         raise ImportError(
-            "google-generativeai required for auto-parameterization.\n"
-            "  pip install google-generativeai"
+            "openai required for auto-parameterization.\n"
+            "  pip install openai"
         )
 
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
+    resolved_model = model or os.environ.get("MACROCLI_MODEL", "")
+    key = api_key or os.environ.get("MACROCLI_API_KEY", "")
+    resolved_base_url = base_url or os.environ.get("MACROCLI_BASE_URL", "")
+
+    if not resolved_model:
+        raise ValueError(
+            "Model required. Set MACROCLI_MODEL env var or pass --model."
+        )
     if not key:
         raise ValueError(
-            "Gemini API key required. Pass --api-key or set GEMINI_API_KEY.\n"
-            "  https://aistudio.google.com/app/apikey"
+            "API key required. Pass --api-key or set MACROCLI_API_KEY."
         )
 
-    genai.configure(api_key=key)
+    client_kwargs = {"api_key": key}
+    if resolved_base_url:
+        client_kwargs["base_url"] = resolved_base_url
+    client = OpenAI(**client_kwargs)
 
     _SYSTEM = """\
 You are a macro parameterization assistant. Given a list of text values
@@ -266,9 +278,15 @@ Example: {"0": "output_path", "2": "export_width"}
     )
     prompt = f"Typed values from the recording:\n{items}\n\nOutput JSON only."
 
-    gem = genai.GenerativeModel(model_name=model, system_instruction=_SYSTEM)
-    response = gem.generate_content(prompt)
-    raw = response.text.strip()
+    response = client.chat.completions.create(
+        model=resolved_model,
+        messages=[
+            {"role": "system", "content": _SYSTEM},
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=1024,
+    )
+    raw = response.choices[0].message.content.strip()
 
     # Strip markdown fences if present
     if raw.startswith("```"):
@@ -281,7 +299,7 @@ Example: {"0": "output_path", "2": "export_width"}
         raw_dict: dict = json.loads(raw)
     except json.JSONDecodeError as e:
         raise ValueError(
-            f"Gemini returned invalid JSON: {e}\nRaw: {raw[:300]}"
+            f"Model returned invalid JSON: {e}\nRaw: {raw[:300]}"
         )
 
     # Convert string keys to int, validate names
@@ -298,3 +316,7 @@ Example: {"0": "output_path", "2": "export_width"}
             result[idx] = v
 
     return result
+
+
+# Keep old name as alias for backwards compatibility
+gemini_suggest_parameters = llm_suggest_parameters

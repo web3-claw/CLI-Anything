@@ -1,15 +1,23 @@
-"""GeminiAssist — use Gemini Vision to generate macro steps from screenshots.
+"""LLMAssist — use a vision model to generate macro steps from screenshots.
 
 This module is OPTIONAL. It requires:
-    pip install google-generativeai
+    pip install openai mss Pillow
+
+Uses the OpenAI SDK, which is compatible with any OpenAI-compatible API
+provider (OpenAI, Azure, local vLLM, Ollama, LiteLLM, etc.).
+
+Configure via environment variables:
+    MACROCLI_MODEL    — model name (required)
+    MACROCLI_API_KEY  — API key
+    MACROCLI_BASE_URL — base URL (only needed for non-OpenAI hosts)
 
 How it works:
   1. Capture a screenshot of the current screen (or use a provided image)
-  2. Send the image + user goal to Gemini Vision with a strict system prompt
-  3. Gemini returns a JSON array of steps (constrained action space)
+  2. Send the image + user goal to the vision model with a strict system prompt
+  3. The model returns a JSON array of steps (constrained action space)
   4. Steps are validated and written as a macro YAML file
 
-The action space Gemini is allowed to produce:
+The action space the model is allowed to produce:
 
     {"type": "click_image",    "description": "...", "confidence": 0.85}
     {"type": "click_relative", "window_title": "...", "x_pct": 0.5, "y_pct": 0.1}
@@ -20,7 +28,7 @@ The action space Gemini is allowed to produce:
     {"type": "menu_click",     "app_name": "...", "menu_path": ["File", "Export"]}
     {"type": "scroll",         "description": "...", "dy": -3}
 
-Gemini is NOT allowed to:
+The model is NOT allowed to:
   - Produce shell commands, Python code, or arbitrary actions
   - Use absolute pixel coordinates
   - Output anything other than the JSON array
@@ -29,11 +37,10 @@ The "description" field in click_image / wait_image / scroll tells the user
 what template image to capture with 'macro record' or 'capture_region'.
 
 Usage:
-    cli-anything-macrocli macro define my_export --assist \
-        --goal "Export the current diagram as PNG to /tmp/out.png" \
+    cli-anything-macrocli macro define my_export --assist \\
+        --goal "Export the current diagram as PNG to /tmp/out.png" \\
         --screenshot current         # takes a fresh screenshot
         --screenshot /path/to/img.png   # use existing image
-        --api-key $GEMINI_API_KEY
 """
 
 from __future__ import annotations
@@ -144,7 +151,7 @@ _REQUIRED_FIELDS = {
 
 
 def _validate_steps(raw_steps: list) -> tuple[list[dict], list[str]]:
-    """Validate and sanitize steps from Gemini output.
+    """Validate and sanitize steps from model output.
 
     Returns (valid_steps, error_messages).
     """
@@ -182,8 +189,8 @@ def _validate_steps(raw_steps: list) -> tuple[list[dict], list[str]]:
 
 # ── Step → YAML step dict conversion ─────────────────────────────────────────
 
-def _gemini_step_to_yaml_step(step: dict, index: int) -> dict:
-    """Convert a validated Gemini step to a macro YAML step dict."""
+def _step_to_yaml_step(step: dict, index: int) -> dict:
+    """Convert a validated model step to a macro YAML step dict."""
     stype = step["type"]
     sid = f"step_{index:03d}_{stype}"
 
@@ -199,7 +206,7 @@ def _gemini_step_to_yaml_step(step: dict, index: int) -> dict:
                 "_template_description": step.get("description", ""),
             },
             "on_failure": "fail",
-            "_gemini_description": step.get("description", ""),
+            "_model_description": step.get("description", ""),
         }
     elif stype == "click_relative":
         return {
@@ -241,7 +248,7 @@ def _gemini_step_to_yaml_step(step: dict, index: int) -> dict:
                 "_template_description": step.get("description", ""),
             },
             "on_failure": "fail",
-            "_gemini_description": step.get("description", ""),
+            "_model_description": step.get("description", ""),
         }
     elif stype == "wait_for_window":
         return {
@@ -289,41 +296,55 @@ def generate_macro(
     macro_name: str,
     screenshot_source: str = "current",   # "current" | path to image file
     api_key: Optional[str] = None,
-    model: str = "gemini-1.5-flash",
+    model: Optional[str] = None,
+    base_url: Optional[str] = None,
     output_path: Optional[str] = None,
 ) -> dict:
-    """Generate a macro YAML from a user goal and screenshot using Gemini.
+    """Generate a macro YAML from a user goal and screenshot using a vision model.
 
     Args:
         goal: Natural language description of what the macro should do.
         macro_name: Name for the generated macro.
         screenshot_source: "current" to take a fresh screenshot, or a
                            file path to use an existing image.
-        api_key: Gemini API key. Falls back to GEMINI_API_KEY env var.
-        model: Gemini model to use.
+        api_key: API key. Falls back to MACROCLI_API_KEY env var.
+        model: Model name. Falls back to MACROCLI_MODEL env var.
+        base_url: Base URL for non-OpenAI providers. Falls back to
+                  MACROCLI_BASE_URL env var.
         output_path: Where to write the YAML file. Defaults to
                      <macro_name>.yaml in the current directory.
 
     Returns:
         dict with keys: yaml_path, steps_count, warnings, raw_steps
     """
+    import base64
+
     try:
-        import google.generativeai as genai
+        from openai import OpenAI
     except ImportError:
         raise ImportError(
-            "google-generativeai is required for Gemini assist.\n"
-            "  pip install google-generativeai"
+            "openai is required for LLM assist.\n"
+            "  pip install openai"
         )
 
-    # Resolve API key
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
+    # Resolve config
+    resolved_model = model or os.environ.get("MACROCLI_MODEL", "")
+    key = api_key or os.environ.get("MACROCLI_API_KEY", "")
+    resolved_base_url = base_url or os.environ.get("MACROCLI_BASE_URL", "")
+
+    if not resolved_model:
+        raise ValueError(
+            "Model required. Pass --model or set MACROCLI_MODEL env var."
+        )
     if not key:
         raise ValueError(
-            "Gemini API key required. Pass --api-key or set GEMINI_API_KEY env var.\n"
-            "Get a key at: https://aistudio.google.com/app/apikey"
+            "API key required. Pass --api-key or set MACROCLI_API_KEY env var."
         )
 
-    genai.configure(api_key=key)
+    client_kwargs = {"api_key": key}
+    if resolved_base_url:
+        client_kwargs["base_url"] = resolved_base_url
+    client = OpenAI(**client_kwargs)
 
     # Get screenshot
     if screenshot_source == "current":
@@ -333,25 +354,27 @@ def generate_macro(
             raise FileNotFoundError(f"Screenshot not found: {screenshot_source}")
         image_bytes = _load_image_bytes(screenshot_source)
 
+    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+
     # Build prompt
-    user_prompt = (
-        f"Goal: {goal}\n\n"
-        "Generate the minimal sequence of steps to achieve this goal. "
-        "Output ONLY the JSON array, nothing else."
+    user_content = [
+        {"type": "text", "text": (
+            f"Goal: {goal}\n\n"
+            "Generate the minimal sequence of steps to achieve this goal. "
+            "Output ONLY the JSON array, nothing else."
+        )},
+        {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}},
+    ]
+
+    response = client.chat.completions.create(
+        model=resolved_model,
+        messages=[
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": user_content},
+        ],
+        max_tokens=2048,
     )
-
-    # Call Gemini
-    gemini_model = genai.GenerativeModel(
-        model_name=model,
-        system_instruction=_SYSTEM_PROMPT,
-    )
-
-    import PIL.Image
-    import io
-    img = PIL.Image.open(io.BytesIO(image_bytes))
-
-    response = gemini_model.generate_content([user_prompt, img])
-    raw_text = response.text.strip()
+    raw_text = response.choices[0].message.content.strip()
 
     # Strip markdown code fences if model added them despite instructions
     if raw_text.startswith("```"):
@@ -366,13 +389,13 @@ def generate_macro(
         raw_steps = json.loads(raw_text)
     except json.JSONDecodeError as e:
         raise ValueError(
-            f"Gemini returned invalid JSON: {e}\n"
+            f"Model returned invalid JSON: {e}\n"
             f"Raw response (first 500 chars):\n{raw_text[:500]}"
         )
 
     if not isinstance(raw_steps, list):
         raise ValueError(
-            f"Gemini returned non-array JSON (expected list): {type(raw_steps)}"
+            f"Model returned non-array JSON (expected list): {type(raw_steps)}"
         )
 
     # Validate
@@ -380,7 +403,7 @@ def generate_macro(
 
     # Convert to YAML step dicts
     yaml_steps = [
-        _gemini_step_to_yaml_step(s, i + 1)
+        _step_to_yaml_step(s, i + 1)
         for i, s in enumerate(valid_steps)
     ]
 
@@ -389,7 +412,7 @@ def generate_macro(
         "name": macro_name,
         "version": "1.0",
         "description": goal,
-        "tags": ["generated", "gemini-assist"],
+        "tags": ["generated", "llm-assist"],
         "parameters": {},
         "preconditions": [],
         "steps": yaml_steps,
@@ -399,8 +422,8 @@ def generate_macro(
             "danger_level": "moderate",
             "side_effects": ["gui_interaction"],
             "reversible": False,
-            "generated_by": "gemini-assist",
-            "model": model,
+            "generated_by": "llm-assist",
+            "model": resolved_model,
         },
     }
 
@@ -409,10 +432,10 @@ def generate_macro(
         {
             "step_id": s["id"],
             "template_path": s["params"].get("template", ""),
-            "description": s.get("_gemini_description", ""),
+            "description": s.get("_model_description", ""),
         }
         for s in yaml_steps
-        if s.get("params", {}).get("template") and s.get("_gemini_description")
+        if s.get("params", {}).get("template") and s.get("_model_description")
     ]
 
     if templates_needed:
